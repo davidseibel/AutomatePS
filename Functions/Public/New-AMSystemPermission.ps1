@@ -118,14 +118,13 @@ function New-AMSystemPermission {
             if ($obj.Type -in @("User","UserGroup")) {
                 $currentPermissions = $obj | Get-AMSystemPermission
                 if ($null -eq $currentPermissions) {
-                    switch ($connection.Version.Major) {
+                    switch ($connection.GetCompatibility()) {
                         10 { $newObject = [AMSystemPermissionv10]::new($connection.Alias) }
-                        {$_ -in 11,22,23,24} {
+                        11 {
                             $newObject = [AMSystemPermissionv11]::new($connection.Alias)
                             $newObject.EditRevisionManagementPermission = $EditRevisionManagement.ToBool()
                             $newObject.ViewRevisionManagementPermission = $ViewRevisionManagement.ToBool()
                         }
-                        default { throw "Unsupported server major version: $_!" }
                     }
                     $newObject.GroupID                         = $obj.ID
                     $newObject.DeployPermission                = $Deploy.ToBool()

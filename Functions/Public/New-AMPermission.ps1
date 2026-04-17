@@ -177,9 +177,9 @@ function New-AMPermission {
                 $currentPermissions = $obj | Get-AMPermission
                 foreach ($p in $Principal) {
                     if ($null -eq ($currentPermissions | Where-Object {$_.GroupID -eq $p.ID})) {
-                        switch ((Get-AMConnection -ConnectionAlias $obj.ConnectionAlias).Version.Major) {
+                        switch ((Get-AMConnection -ConnectionAlias $obj.ConnectionAlias).GetCompatibility()) {
                             10 { $newObject = [AMPermissionv10]::new($obj, $p, $obj.ConnectionAlias) }
-                            {$_ -in 11,22,23,24} {
+                            11 {
                                 $newObject = [AMPermissionv11]::new($obj, $p, $obj.ConnectionAlias)
                                 $newObject.DeleteRevisionFromRecycleBinPermission  = $DeleteRevisionFromRecycleBin.ToBool()
                                 $newObject.DeleteRevisionPermission                = $DeleteRevision.ToBool()
@@ -187,7 +187,6 @@ function New-AMPermission {
                                 $newObject.RestoreRevisionPermission               = $RestoreRevision.ToBool()
                                 $newObject.UpdateRevisionPermission                = $UpdateRevision.ToBool()
                             }
-                            default { throw "Unsupported server major version: $_!" }
                         }
                         $newObject.AssignPermission      = $Assign.ToBool()
                         $newObject.CreatePermission      = $Create.ToBool()

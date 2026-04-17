@@ -125,7 +125,7 @@ function Invoke-AMRestMethod {
             if ($null -ne $object) {
                 $processUnrecognizedObject = $false
                 # Format and return the object
-                switch ($c.Version.Major) {
+                switch ($c.GetCompatibility()) {
                     10 {
                         switch ($object.Type -as [AMConstructType]) {
                             "Agent"         { [AMAgentv10]::new($object,$lookupTable,$c.Alias)  }
@@ -166,7 +166,7 @@ function Invoke-AMRestMethod {
                             default            { $processUnrecognizedObject = $true}
                         }
                     }
-                    {$_ -in 11,22,23,24} {
+                    11 {
                         switch ($object.Type -as [AMConstructType]) {
                             "Agent"         { [AMAgentv11]::new($object,$lookupTable,$c.Alias)  }
                             "AgentGroup"    { [AMAgentGroupv11]::new($object,$lookupTable,$c.Alias) }
