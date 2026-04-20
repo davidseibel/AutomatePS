@@ -86,10 +86,10 @@ function New-AMUser {
             switch ($Connection.GetCompatibility()) {
                 10 { $newObject = [AMUserv10]::new($Name, $Folder, $Connection.Alias) }
                 11 {
-                    if ($Connection.Version.Major -in 11,22) {
-                        $newObject = [AMUserv11]::new($Name, $Folder, $Connection.Alias)
+                    if (Test-AMFeatureSupport -Connection $c -Feature MultiDomainUser -Action Ignore) {
+                        $newObject = [AMUserv23]::new($Name, $Folder, $Connection.Alias)
                     } else {
-                        $newObject = [AMUserv1123]::new($Name, $Folder, $Connection.Alias)
+                        $newObject = [AMUserv11]::new($Name, $Folder, $Connection.Alias)
                     }
                 }
             }

@@ -197,12 +197,18 @@ function Invoke-AMRestMethod {
                             "Instance"         { [AMInstancev11]::new($object,$lookupTable,$c.Alias) }
                             "Permission"       { [AMPermissionv11]::new($object,$lookupTable,$c.Alias) }
                             "Process"          { [AMProcessv11]::new($object,$lookupTable,$c.Alias) }
-                            "SystemPermission" { [AMSystemPermissionv11]::new($object,$lookupTable,$c.Alias) }
+                            "SystemPermission" {
+                                if (Test-AMFeatureSupport -Connection $c -Feature Credentials -Action Ignore) {
+                                    [AMSystemPermissionv11dot4]::new($object,$lookupTable,$c.Alias)
+                                } else {
+                                    [AMSystemPermissionv11]::new($object,$lookupTable,$c.Alias)
+                                }
+                            }
                             "Task"             { [AMTaskv11]::new($object,$lookupTable,$c.Alias) }
                             "TaskProperty"     { [AMTaskPropertyv11]::new($object,$lookupTable,$c.Alias) }
                             "User"             {
-                                if ($c.Version.Major -ge 23) {
-                                    [AMUserv1123]::new($object,$lookupTable,$c.Alias)
+                                if (Test-AMFeatureSupport -Connection $c -Feature MultiDomainUser -Action Ignore) {
+                                    [AMUserv23]::new($object,$lookupTable,$c.Alias)
                                 } else {
                                     [AMUserv11]::new($object,$lookupTable,$c.Alias)
                                 }
