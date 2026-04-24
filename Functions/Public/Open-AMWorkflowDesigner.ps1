@@ -43,7 +43,7 @@ function Open-AMWorkflowDesigner {
 
     PROCESS {
         foreach ($obj in $Workflow) {
-            $connection = Get-AMConnection -ConnectionAlias $Workflow.ConnectionAlias
+            $connection = Get-AMConnection -ConnectionAlias $obj.ConnectionAlias
             switch ($connection.Version.Major) {
                 10 { $programFolder = "AutoMate BPA Server 10"  }
                 11 { $programFolder = "Automate Enterprise 11" }
@@ -53,7 +53,7 @@ function Open-AMWorkflowDesigner {
                 25 { $programFolder = "Automate 2025" }
                 default {
                     if (-not $PSBoundParameters.ContainsKey("InstallationPath")) {
-                            throw "Unsupported server major version: $_!"
+                        throw "Unsupported server major version: $_!"
                     }
                 }
             }
