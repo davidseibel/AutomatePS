@@ -67,19 +67,19 @@ function Open-AMWorkflowDesigner {
                     $managementServerPort = 9703
                 }
             }
+            $x64path = Join-Path -Path $env:ProgramFiles -ChildPath $programFolder
+            $x86path = Join-Path -Path ${env:ProgramFiles(x86)} -ChildPath $programFolder
             if (-not $PSBoundParameters.ContainsKey("InstallationPath")) {
-                if (Test-Path -Path "$($env:ProgramFiles)\$programFolder") {
-                    $InstallationPath = "$($env:ProgramFiles)\$programFolder"
-                } elseif (Test-Path -Path "$(${env:ProgramFiles(x86)})\$programFolder") {
-                    $InstallationPath = "$(${env:ProgramFiles(x86)})\$programFolder"
-                } else {
-                    throw "Could not find the installation path for Automate!"
-                }
+                if     (Test-Path -Path $x64path) { $InstallationPath = $x64path }
+                elseif (Test-Path -Path $x86path) { $InstallationPath = $x86path }
+                else                              { throw "Could not find the installation path for Automate!" }
             }
-            if (-not (Test-Path -Path "$InstallationPath\$designerEXE") -or -not(Test-Path -Path "$InstallationPath\$utilityDLL")) {
+            $designerPath = Join-Path -Path $InstallationPath -ChildPath $designerEXE
+            $utilityPath  = Join-Path -Path $InstallationPath -ChildPath $utilityDLL
+            if (-not (Test-Path -Path $designerPath) -or -not(Test-Path -Path $utilityPath)) {
                 throw "Specified InstallationPath '$InstallationPath' does not contain the required Automate binaries!"
             }
-            Add-Type -Path "$InstallationPath\$utilityDLL"
+            Add-Type -Path $utilityPath
             switch ($connection.GetCompatibility()) {
                 10 { $encryptedPass = [Automate.Utilities.v10.StringManager]::EncryptTripleDESSalted($connection.Credential.GetNetworkCredential().Password) }
                 11 { $encryptedPass = [Automate.Utilities.v11.StringManager]::EncryptWithMostAdvanced($connection.Credential.GetNetworkCredential().Password) }
@@ -88,7 +88,7 @@ function Open-AMWorkflowDesigner {
             $procArgs = [string]::Format('{0}:{1} "{2}" "{3}" "-ID:{4}"', $connection.Server, $managementServerPort, $connection.Credential.UserName, $encryptedPass, $Workflow.ID)
 
             $processStartInfo = [System.Diagnostics.ProcessStartInfo]::new()
-            $processStartInfo.FileName = "$InstallationPath\$designerEXE"
+            $processStartInfo.FileName = $designerPath
             $processStartInfo.Arguments = $procArgs
             $processStartInfo.UseShellExecute = $true
 
